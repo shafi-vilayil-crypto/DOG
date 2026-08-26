@@ -1,0 +1,60 @@
+{
+  "app_name": "DOG (AI Performance & Cost Optimization SaaS)",
+  "context": "AI Performance, Reliability, and Cost Optimization Middleware",
+  "typography": {
+    "headings": "Outfit, Manrope, sans-serif",
+    "body": "Inter, DM Sans, sans-serif",
+    "weights": ["300", "400", "500", "600", "700"]
+  },
+  "colors": {
+    "primary": "#10B981",
+    "primary_foreground": "#FFFFFF",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "card": "#FFFFFF",
+    "card_border": "#E2E8F0",
+    "text_main": "#0F172A",
+    "text_muted": "#64748B",
+    "accent_mint": "#34D399",
+    "warning_amber": "#F59E0B",
+    "critical_red": "#EF4444",
+    "info_blue": "#3B82F6"
+  },
+  "visual_enhancers": {
+    "shadows": [
+      "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]",
+      "shadow-[0_10px_30px_-5px_rgba(16,185,129,0.08)]"
+    ],
+    "border_radius": "rounded-2xl",
+    "glassmorphism": "backdrop-blur-xl bg-white/80 border border-slate-200/80"
+  },
+  "navigation": {
+    "primary": ["Overview", "Performance", "Cost", "Reliability", "Optimizations"],
+    "secondary": ["Integrations", "API Keys", "Documentation", "Settings"]
+  },
+  "components": [
+    "DashboardCard",
+    "MetricCard",
+    "ChartCard",
+    "StatusIndicator",
+    "EventTimeline",
+    "ProviderCard",
+    "Navigation",
+    "UserMenu",
+    "DateRangeSelector",
+    "DataTable",
+    "EmptyState",
+    "LoadingState",
+    "Alert",
+    "Modal",
+    "Toast"
+  ],
+  "instructions_to_main_agent": "Build the fully interactive, responsive DOG SaaS platform with mock data, all requested pages (Overview, Performance, Cost, Reliability, Optimizations, Integrations, API Keys, Settings), gorgeous wordmark logo with integrated clock hands inside the letter O, full navigation, data-testid attributes on all interactive elements, and professional animations.",
+  "universal_guidelines": [
+    "Ensure all interactive elements have data-testid attributes",
+    "Maintain generous spacing (p-6, p-8, gap-6)",
+    "Never use pure black or pure white un-tinted surfaces",
+    "Respect responsive viewports with sidebar/header collapse",
+    "Use Sonner for toasts"
+  ]
+}

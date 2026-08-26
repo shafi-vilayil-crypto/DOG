@@ -1,0 +1,2 @@
+import { CheckCircle2, Circle } from "lucide-react";
+export default function StatusList({ items }) { return <div className="status-list" data-testid="system-health-list">{items.map((item) => <div className="status-row" key={item.name}><span className="status-name">{item.mark && <b className="provider-mark" style={{ background: item.color }}>{item.mark}</b>}{item.name}</span><span className={item.status === "Operational" ? "status-good" : "status-neutral"}>{item.status === "Operational" ? <CheckCircle2 size={15} /> : <Circle size={15} />}{item.status}</span></div>)}</div>; }

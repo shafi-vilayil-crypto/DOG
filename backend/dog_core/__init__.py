@@ -1,0 +1,1 @@
+"""Provider-agnostic DOG intelligence primitives."""
