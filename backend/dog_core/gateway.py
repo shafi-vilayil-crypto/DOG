@@ -56,9 +56,9 @@ class DOGGateway:
         self.loops = LoopDetector()
         self.latency = LatencyEngine()
         self.thresholds = {
-            "full": float(os.environ["DOG_LATENCY_FULL_MS"]),
-            "short": float(os.environ["DOG_LATENCY_SHORT_MS"]),
-            "critical": float(os.environ["DOG_LATENCY_CRITICAL_MS"]),
+            "full": float(os.environ.get("DOG_LATENCY_FULL_MS", "2000")),
+            "short": float(os.environ.get("DOG_LATENCY_SHORT_MS", "500")),
+            "critical": float(os.environ.get("DOG_LATENCY_CRITICAL_MS", "5000")),
         }
         self.telemetry_sink = telemetry_sink or (lambda event: None)
         self.credential_loader = credential_loader

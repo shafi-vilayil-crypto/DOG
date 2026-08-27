@@ -5,7 +5,7 @@ import uuid
 import requests
 
 
-BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", os.environ.get("BACKEND_URL", "http://localhost:8000")).rstrip("/")
 DOG_KEY = "dog_demo_acme_2026"
 HEADERS = {"X-DOG-API-Key": DOG_KEY}
 

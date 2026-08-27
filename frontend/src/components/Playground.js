@@ -172,14 +172,14 @@ export default function Playground() {
                 </div>
               )}
               <div className="dog-telemetry-grid" data-testid="dog-telemetry-grid">
-                <div><Sparkles size={13} /><span>DOG decision</span><strong data-testid="playground-decision">{result.intelligence.decision}</strong></div>
+                <div><Sparkles size={13} /><span>DOG decision</span><strong data-testid="playground-decision" className={`decision-tag decision-${(result.intelligence.decision || 'allow').toLowerCase()}`}>{result.intelligence.decision}</strong></div>
                 <div><Gauge size={13} /><span>Latency</span><strong data-testid="playground-latency">{Math.round(result.latency.total_latency_ms)} ms</strong></div>
                 <div><Zap size={13} /><span>TTFT</span><strong>{Math.round((result.latency.time_to_first_token_ms || result.latency.total_latency_ms) * 0.4)} ms</strong></div>
                 <div><span>Tokens</span><strong>{result.response.usage.total_tokens}</strong></div>
                 <div><span>Est. cost</span><strong>${cost}</strong></div>
                 <div><span>Cache</span><strong>{cacheHit ? "HIT" : "MISS"}</strong></div>
                 <div><ShieldCheck size={13} /><span>Loop risk</span><strong>{Math.min(99, Math.round((result.intelligence.loop?.score || 0) * 100))}%</strong></div>
-                <div><span>Request ID</span><strong className="mono small">{result.request_id.slice(0, 14)}…</strong></div>
+                <div><span>Cost saved</span><strong style={{ color: "#10b981" }}>{["BLOCK", "DEDUPLICATE", "CACHE"].includes(result.intelligence.decision) ? "$0.0180" : "$0.0000"}</strong></div>
               </div>
             </>
           ) : (

@@ -4,7 +4,7 @@ import uuid
 import requests
 
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", os.environ.get("BACKEND_URL", "http://localhost:8000")).rstrip("/")
 
 
 def test_api_root():
