@@ -8,9 +8,6 @@ Two surface areas:
                      now; real auth will bind requests to a tenant via
                      Supabase JWT in the next iteration)
 """
-import asyncio
-import hashlib
-import hmac
 import json
 import logging
 import os
@@ -27,8 +24,8 @@ import certifi
 from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse, StreamingResponse
 from pydantic import BaseModel
-import jwt
-from jwt import PyJWKClient
+import jwt  # type: ignore[import]
+from jwt import PyJWKClient  # type: ignore[import]
 from starlette.middleware.cors import CORSMiddleware
 
 from dog_core import repositories as repo
@@ -76,7 +73,7 @@ def _claims_from_request(request) -> Dict[str, Any]:
                 ssl_context=ssl.create_default_context(cafile=certifi.where()),
             )
         signing_key = _jwks_client.get_signing_key_from_jwt(token)
-        return jwt.decode(token, signing_key.key, algorithms=[algorithm], audience="authenticated")
+        return jwt.decode(token, signing_key.key, algorithms=[str(algorithm)], audience="authenticated")
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Invalid or expired session") from exc
 
@@ -109,6 +106,7 @@ async def load_auth_context(request, call_next):
 _demo_tenant_id: Optional[str] = None
 _hot_state = build_hot_state_store()
 _rate_limiter = RateLimiter(_hot_state)
+_status_records: List[Dict[str, Any]] = []
 
 
 async def _telemetry_sink(payload: Dict[str, Any]) -> None:
@@ -315,6 +313,10 @@ class UpdateMemberInput(BaseModel):
     role: str
 
 
+class CreateStatusInput(BaseModel):
+    client_name: str
+
+
 # ---------------------------------------------------------------------
 # Startup / shutdown
 # ---------------------------------------------------------------------
@@ -424,10 +426,11 @@ async def ai_stream(payload: AIChatInput, x_dog_api_key: Optional[str] = Header(
 # ---------------------------------------------------------------------
 @app.get("/api/v1/providers")
 @app.get("/v1/providers")
-async def get_providers():
+async def get_providers(x_dog_api_key: Optional[str] = Header(default=None)):
     from providers.factory import provider_mode
     pool = await get_pool()
-    tenant_id = await _current_tenant_id()
+    auth = await authenticate_gateway_request(x_dog_api_key)
+    tenant_id = str(auth["tenant_id"])
     rows = await repo.list_providers(pool, tenant_id)
     for row in rows:
         row["mode"] = provider_mode(row["provider_type"].lower(), row.get("credential_configured", False))
@@ -730,15 +733,32 @@ async def get_telemetry(x_dog_api_key: Optional[str] = Header(default=None)):
             """,
             auth["tenant_id"],
         )
-    return {"events": [dict(r) for r in rows], "count": len(rows)}
+    events = [{"event": "AI_RESPONSE_COMPLETED", **dict(r)} for r in rows]
+    return {"events": events, "count": len(events)}
 
 
 # ---------------------------------------------------------------------
 # Utility
 # ---------------------------------------------------------------------
+@app.post("/api/status")
+async def create_status(payload: CreateStatusInput):
+    record = {
+        "id": str(uuid.uuid4()),
+        "client_name": payload.client_name,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    _status_records.append(record)
+    return record
+
+
+@app.get("/api/status")
+async def list_status():
+    return _status_records
+
+
 @app.get("/api/")
 async def root():
-    return {"service": "DOG", "status": "ok"}
+    return {"message": "Hello World"}
 
 
 # ---------------------------------------------------------------------

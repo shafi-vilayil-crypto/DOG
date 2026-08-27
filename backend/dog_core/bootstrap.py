@@ -25,9 +25,10 @@ def hash_api_key(secret: str) -> str:
 
 async def _seed_providers(conn: asyncpg.Connection, tenant_id: str) -> None:
     catalog = [
-        ("OpenAI", "OPENAI", "gpt-5.2", 3.00, 12.00),
-        ("Anthropic", "ANTHROPIC", "claude-sonnet-4-6", 3.50, 15.00),
-        ("Gemini", "GEMINI", "gemini-3.6-flash", 0.35, 1.40),
+        ("openai", "OPENAI", "gpt-5.2", 3.00, 12.00),
+        ("anthropic", "ANTHROPIC", "claude-sonnet-4-6", 3.50, 15.00),
+        ("gemini", "GEMINI", "gemini-3.6-flash", 0.35, 1.40),
+        ("custom", "CUSTOM", "custom", 0.00, 0.00),
     ]
     for name, ptype, default_model, input_cost, output_cost in catalog:
         provider_id = await conn.fetchval(

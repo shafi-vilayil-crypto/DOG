@@ -16,18 +16,24 @@ import logging
 import os
 import time
 import uuid
-from typing import AsyncIterator, Awaitable, Callable, Dict, Optional
+from typing import AsyncGenerator, Awaitable, Callable, Dict, Optional
 
 from .decision import decide
 from .duplicate import DuplicateDetector
 from .fingerprints import exact_fingerprint, normalized_fingerprint
 from .latency import LatencyEngine
 from .loop import LoopDetector
-from .models import AIRequest, AIResponse, LatencyMetrics, TelemetryEvent
+from .models import AIRequest, AIResponse, LatencyMetrics
 from .stores import InMemoryRequestStateStore
-from providers.factory import get_provider_adapter
+from providers.base import AIProviderAdapter  # type: ignore[import]
+from providers.factory import get_provider_adapter  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
+
+
+async def _noop_telemetry_sink(event: Dict) -> None:
+    """Default sink used when the gateway is created without persistence."""
+    return None
 
 # Rough per-prevented-call savings estimate by provider (USD).
 PROVIDER_SAVINGS = {
@@ -60,10 +66,10 @@ class DOGGateway:
             "short": float(os.environ.get("DOG_LATENCY_SHORT_MS", "500")),
             "critical": float(os.environ.get("DOG_LATENCY_CRITICAL_MS", "5000")),
         }
-        self.telemetry_sink = telemetry_sink or (lambda event: None)
+        self.telemetry_sink = telemetry_sink or _noop_telemetry_sink
         self.credential_loader = credential_loader
 
-    async def _adapter(self, request: AIRequest):
+    async def _adapter(self, request: AIRequest) -> AIProviderAdapter:
         credentials = None
         if self.credential_loader:
             try:
@@ -76,7 +82,7 @@ class DOGGateway:
         payload = {"messages": request.messages, "model": request.model, "provider": request.provider, "tools": request.tools or []}
         exact = exact_fingerprint(payload)
         normalized = normalized_fingerprint(payload)
-        duplicate = await self.duplicates.check(request.tenant_id, request.session_id or "default", normalized, bool(request.tools))
+        duplicate = await self.duplicates.check(request.tenant_id, request.session_id or "default", normalized, None if not request.tools else "tools")
         loop = self.loops.assess(duplicate, bool(request.tools))
         elapsed = (time.perf_counter() - started) * 1000
         latency_class = self.latency.classify(elapsed, self.thresholds)
@@ -140,7 +146,7 @@ class DOGGateway:
             "telemetry": "queued",
         }
 
-    async def stream(self, request: AIRequest) -> AsyncIterator[Dict[str, object]]:
+    async def stream(self, request: AIRequest) -> AsyncGenerator[Dict[str, object], None]:
         started = time.perf_counter()
         started_at_utc = time.time()
         request_id = f"req_{uuid.uuid4().hex[:16]}"

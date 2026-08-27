@@ -1,0 +1,4 @@
+[python]
+python_interpreter = ".venv/bin/python3.13"
+venv = ".venv"
+search_path = ["."]
